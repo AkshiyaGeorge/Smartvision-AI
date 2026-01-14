@@ -9,3 +9,4 @@ ultralytics
 Pillow
 tqdm
 datasets
+gdown
