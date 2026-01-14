@@ -5,3 +5,7 @@ matplotlib
 pandas
 numpy
 opencv-python-headless
+ultralytics
+tensorflow
+scikit-learn
+Pillow
