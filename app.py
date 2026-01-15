@@ -3,8 +3,6 @@ import streamlit as st
 from PIL import Image
 import os
 
-# Local helpers
-from utils import download_file, download_folder
 from datasets import load_dataset
 
 
@@ -589,4 +587,5 @@ def main():
             PAGES[name]()  # Call the corresponding page function
 
 if __name__ == "__main__":
+
     main()
