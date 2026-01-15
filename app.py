@@ -131,17 +131,15 @@ def page_home():
 
     # Demo images: 3 from repo + 3 from local folder
     demo_images = [
-        # Repo dataset demos
-        ("Smartvision-AI/smartvision_dataset/detection/images/image_000000.jpg",
-         "Smartvision-AI/smartvision_dataset/detection/labels/image_000000.txt",
+        ("smartvision_dataset/detection/images/image_000000.jpg",
+         "smartvision_dataset/detection/labels/image_000000.txt",
          "📷 Demo 1"),
-        ("Smartvision-AI/smartvision_dataset/detection/images/image_000010.jpg",
-         "Smartvision-AI/smartvision_dataset/detection/labels/image_000010.txt",
+        ("smartvision_dataset/detection/images/image_000010.jpg",
+         "smartvision_dataset/detection/labels/image_000010.txt",
          "📷 Demo 2"),
-        ("Smartvision-AI/smartvision_dataset/detection/images/image_000020.jpg",
-         "Smartvision-AI/smartvision_dataset/detection/labels/image_000020.txt",
+        ("smartvision_dataset/detection/images/image_000020.jpg",
+         "smartvision_dataset/detection/labels/image_000020.txt",
          "📷 Demo 3"),
-
     ]
 
     # Loop through all demos
@@ -589,3 +587,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
