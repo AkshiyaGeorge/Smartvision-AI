@@ -2,7 +2,6 @@
 import streamlit as st
 from PIL import Image
 import os
-
 from datasets import load_dataset
 
 
@@ -132,14 +131,14 @@ def page_home():
     # Demo images: 3 from repo + 3 from local folder
     demo_images = [
         ("smartvision_dataset/detection/images/image_000000.jpg",
-         "smartvision_dataset/detection/labels/image_000000.txt",
-         "📷 Demo 1"),
+        "smartvision_dataset/detection/labels/image_000000.txt",
+        "📷 Demo 1"),
         ("smartvision_dataset/detection/images/image_000010.jpg",
-         "smartvision_dataset/detection/labels/image_000010.txt",
-         "📷 Demo 2"),
+        "smartvision_dataset/detection/labels/image_000010.txt",
+        "📷 Demo 2"),
         ("smartvision_dataset/detection/images/image_000020.jpg",
-         "smartvision_dataset/detection/labels/image_000020.txt",
-         "📷 Demo 3"),
+        "smartvision_dataset/detection/labels/image_000020.txt",
+        "📷 Demo 3"),
     ]
 
     # Loop through all demos
@@ -180,11 +179,16 @@ import os
 # Use relative path inside the repo
 base_path = "Models"
 
+import os
+
+# Use relative path inside the repo
+base_path = "models"
+
 MODELS = {
-    "VGG16": (os.path.join(base_path, "best_vgg16.keras"), vgg_pre),
-    "ResNet50": (os.path.join(base_path, "best_resnet50.keras"), res_pre),
-    "MobileNetV2": (os.path.join(base_path, "best_mobilenetv2.keras"), mob_pre),
-    "EfficientNetB0": (os.path.join(base_path, "best_efficientnetb0.keras"), eff_pre),
+    "VGG16": (os.path.join(base_path, "best_vgg16_quantized.tflite"), vgg_pre),
+    "ResNet50": (os.path.join(base_path, "best_resnet50_quantized.tflite"), res_pre),
+    "MobileNetV2": (os.path.join(base_path, "best_mobilenetv2_quantized.tflite"), mob_pre),
+    "EfficientNetB0": (os.path.join(base_path, "best_efficientnetb0_quantized.tflite"), eff_pre),
 }
 
 CLASS_NAMES = [
@@ -585,6 +589,4 @@ def main():
             PAGES[name]()  # Call the corresponding page function
 
 if __name__ == "__main__":
-
     main()
-
