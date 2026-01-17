@@ -112,6 +112,13 @@ def page_home():
     st.markdown("""
     <div style='color:#34495e; font-size:16px;'>
     SmartVision AI is a unified platform for image classification and object detection.<br><br>
+    <div style='color:#34495e; font-size:16px;'>
+    📂 Dataset Information
+    Source: COCO dataset (25 selected classes)
+    Classes Used: person, bicycle, car, motorcycle, airplane, bus, train, truck, traffic light, stop sign, bench, bird, cat, dog, horse, cow, elephant, bottle, cup, bowl, pizza, cake, chair, couch, potted plant<br><br>   
+    Images per class: 100 (balanced dataset)
+    Structure: Train / Validation / Test splits with augmentation applied. <br><br>        
+    
     <b>🔍 Key Features:</b><br>
     • 🧠 Image classification with 4 CNN models: <span style='color:#8e44ad;'>VGG16</span>, <span style='color:#8e44ad;'>ResNet50</span>, <span style='color:#8e44ad;'>MobileNetV2</span>, <span style='color:#8e44ad;'>EfficientNetB0</span><br>
     • 🎯 Object detection with <span style='color:#e74c3c;'>YOLOv8</span><br>
@@ -161,10 +168,11 @@ from tensorflow.keras.applications.efficientnet import preprocess_input as eff_p
 # -----------------------------
 # Replace with your actual Drive file IDs
 DRIVE_IDS = {
-    "VGG16": "1Pn7IDM2pJdg8E5y4kQjzdJ-1criM4UvB",
+    "VGG16": "1vK88TFwcavnPi2n-vms5WE8DhLTDcwBc",
     "ResNet50": "1X-i_G_9Kyl7rNGbmEDQ5yYHF_SyzRwVW",
-    "MobileNetV2": "1_TxFmwxdeiaVXfAAYWWfnEKUUSd_gv_K",
-    "EfficientNetB0": "1vK88TFwcavnPi2n-vms5WE8DhLTDcwBc",
+    "MobileNetV2": "1Pn7IDM2pJdg8E5y4kQjzdJ-1criM4UvB",
+    "EfficientNetB0": "1_TxFmwxdeiaVXfAAYWWfnEKUUSd_gv_K",
+
 }
 
 CLASS_NAMES = [
@@ -341,9 +349,8 @@ results = [
     {"Model": "ResNet50", "Epoch": 20, "acc": 100.0, "loss": 0.002, "precision": 100.0, "recall": 100.0,
      "top5": 100.0, "val_acc": 41.9, "val_loss": 2.742, "val_precision": 50.5, "val_recall": 37.4,
      "val_top5": 72.9, "lr": 0.00003125},
-    {"Model": "MobileNetV2", "Epoch": 12, "acc": 94.5, "loss": 0.222, "precision": 97.6, "recall": 91.0,
-     "top5": 99.2, "val_acc": 36.2, "val_loss": 2.830, "val_precision": 50.3, "val_recall": 29.2,
-     "val_top5": 63.9, "lr": 0.00025},
+    {"Model": "MobileNetV2","Epoch": 12,"acc": 94.5,"loss": 0.222,"precision": 97.6,"recall": 91.0,"top5": 99.2,"val_acc": 36.2,"val_loss": 2.830,
+    "val_precision": 50.3,"val_recall": 29.2,"val_top5": 63.9,"lr": 0.00025},
     {"Model": "EfficientNetB0", "Epoch": 14, "acc": 97.5, "loss": 0.122, "precision": 98.7, "recall": 95.6,
      "top5": 99.6, "val_acc": 41.9, "val_loss": 2.603, "val_precision": 50.6, "val_recall": 37.1,
      "val_top5": 70.9, "lr": 0.000075}
@@ -374,7 +381,7 @@ def page_performance():
     st.markdown("<h2 style='color:#9b59b6;'>🏆 Top-5 Accuracy</h2>", unsafe_allow_html=True)
     st.bar_chart(df_results.set_index("Model")[["top5", "val_top5"]])
 
-    # ✅ Inference speed comparison (hard-coded example, replace with measured times)
+    # ✅ Inference speed comparison (hard-coded example)
     st.markdown("<h2 style='color:#d35400;'>⚡ Inference Speed (seconds per image)</h2>", unsafe_allow_html=True)
     st.bar_chart({"VGG16": 0.12, "ResNet50": 0.18, "MobileNetV2": 0.08, "EfficientNetB0": 0.10})
 
@@ -382,7 +389,22 @@ def page_performance():
     st.markdown("<h2 style='color:#16a085;'>📑 Class-wise Performance</h2>", unsafe_allow_html=True)
     if os.path.exists("class_metrics.csv"):
         df_classes = pd.read_csv("class_metrics.csv")
-        st.dataframe(df_classes.style.highlight_max(axis=0, color="lightgreen"))
+
+        # ✅ Convert all non-Class columns to numeric
+        numeric_cols = []
+        for col in df_classes.columns:
+            if col != "Class":
+                df_classes[col] = pd.to_numeric(df_classes[col], errors="coerce")
+                if df_classes[col].notna().any():
+                    numeric_cols.append(col)
+
+        # ✅ Apply styling only to safe numeric columns
+        try:
+            styled_df = df_classes.style.highlight_max(subset=numeric_cols, axis=0, color="lightgreen")
+            st.dataframe(styled_df)
+        except Exception as e:
+            st.warning(f"⚠️ Styling failed: {e}. Showing raw table instead.")
+            st.dataframe(df_classes)
 
         # Per-class comparison chart
         selected_class = st.selectbox("Select a class to compare across models:", df_classes["Class"])
@@ -390,9 +412,24 @@ def page_performance():
 
         chart_data = pd.DataFrame({
             "Model": ["VGG16", "ResNet50", "MobileNetV2", "EfficientNetB0"],
-            "Precision": [row["VGG16_Precision"], row["ResNet50_Precision"], row["MobileNetV2_Precision"], row["EffNetB0_Precision"]],
-            "Recall": [row["VGG16_Recall"], row["ResNet50_Recall"], row["MobileNetV2_Recall"], row["EffNetB0_Recall"]],
-            "F1": [row["VGG16_F1"], row["ResNet50_F1"], row["MobileNetV2_F1"], row["EffNetB0_F1"]],
+            "Precision": [
+                float(row["VGG16_Precision"]),
+                float(row["ResNet50_Precision"]),
+                float(row["MobileNetV2_Precision"]),
+                float(row["EffNetB0_Precision"])
+            ],
+            "Recall": [
+                float(row["VGG16_Recall"]),
+                float(row["ResNet50_Recall"]),
+                float(row["MobileNetV2_Recall"]),
+                float(row["EffNetB0_Recall"])
+            ],
+            "F1": [
+                float(row["VGG16_F1"]),
+                float(row["ResNet50_F1"]),
+                float(row["MobileNetV2_F1"]),
+                float(row["EffNetB0_F1"])
+            ],
         })
         st.bar_chart(chart_data.set_index("Model"))
     else:
