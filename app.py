@@ -1,13 +1,8 @@
-# app.py
+import streamlit as st
 import streamlit as st
 from PIL import Image
 import os
-from datasets import load_dataset
 
-
-
-
-# Streamlit page setup
 st.set_page_config(
     page_title="SmartVision AI",
     page_icon="🤖",
@@ -45,7 +40,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Welcome message
 st.write("Welcome to SmartVision AI 🤖. Use the navigation menu above to explore features.")
 
 
@@ -128,20 +122,19 @@ def page_home():
 
     st.markdown("<h2 style='color:#d35400;'>🖼️ Sample Detection Demos</h2>", unsafe_allow_html=True)
 
-    # Demo images: 3 from repo + 3 from local folder
+    # Replace last two unclear demos with new ones
     demo_images = [
         ("smartvision_dataset/detection/images/image_000000.jpg",
-        "smartvision_dataset/detection/labels/image_000000.txt",
-        "📷 Demo 1"),
+         "smartvision_dataset/detection/labels/image_000000.txt",
+         "📷 Demo 1: Street Scene"),
         ("smartvision_dataset/detection/images/image_000010.jpg",
-        "smartvision_dataset/detection/labels/image_000010.txt",
-        "📷 Demo 2"),
+         "smartvision_dataset/detection/labels/image_000010.txt",
+         "📷 Demo 2: Restaurant Scene"),
         ("smartvision_dataset/detection/images/image_000020.jpg",
-        "smartvision_dataset/detection/labels/image_000020.txt",
-        "📷 Demo 3"),
+         "smartvision_dataset/detection/labels/image_000020.txt",
+         "📷 Demo 3: Outdoor Bench Scene")
     ]
 
-    # Loop through all demos
     for img_path, label_path, caption in demo_images:
         if os.path.exists(img_path):
             annotated_img = draw_yolo_boxes(img_path, label_path, CLASS_NAMES)
@@ -172,23 +165,11 @@ from tensorflow.keras.applications.efficientnet import preprocess_input as eff_p
 # -----------------------------
 # Config: model paths and classes
 # -----------------------------
-import os
-
-import os
-
-# Use relative path inside the repo
-base_path = "Models"
-
-import os
-
-# Use relative path inside the repo
-base_path = "models"
-
 MODELS = {
-    "VGG16": (os.path.join(base_path, "best_vgg16_quantized.tflite"), vgg_pre),
-    "ResNet50": (os.path.join(base_path, "best_resnet50_quantized.tflite"), res_pre),
-    "MobileNetV2": (os.path.join(base_path, "best_mobilenetv2_quantized.tflite"), mob_pre),
-    "EfficientNetB0": (os.path.join(base_path, "best_efficientnetb0_quantized.tflite"), eff_pre),
+    "VGG16": (r"C:\Akshi Personal\SMARTVISION AI\best_vgg16.keras", vgg_pre),
+    "ResNet50": (r"C:\Akshi Personal\SMARTVISION AI\best_resnet50.keras", res_pre),
+    "MobileNetV2": (r"C:\Akshi Personal\SMARTVISION AI\best_mobilenetv2.keras", mob_pre),
+    "EfficientNetB0": (r"C:\Akshi Personal\SMARTVISION AI\best_efficientnetb0.keras", eff_pre),
 }
 
 CLASS_NAMES = [
@@ -328,10 +309,10 @@ def page_detection():
             else:
                 st.info("No objects detected at this confidence threshold.")
 
-#------------------------------------------------------------------------------
-# Page 4: Model Performance Dashboard
-#-------------------------------------------------------------------------------
 
+# -----------------------------
+# Page 4: Model Performance
+# -----------------------------
 import os
 import streamlit as st
 import pandas as pd
@@ -353,10 +334,15 @@ results = [
 ]
 
 def page_performance():
-    base_path = "Smartvision-AI"
-
-    st.markdown("<h1 style='color:#27ae60;'>📊 Model Performance Dashboard</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='color:#2980b9;'>Compare accuracy, precision, recall, F1, inference speed, and confusion matrices</h3>", unsafe_allow_html=True)
+    # Styled title with emoji
+    st.markdown(
+        "<h1 style='color:#27ae60;'>📊 Model Performance Dashboard</h1>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<h3 style='color:#2980b9;'>Compare accuracy, precision, recall, F1, inference speed, and confusion matrices</h3>",
+        unsafe_allow_html=True
+    )
 
     df_results = pd.DataFrame(results)
 
@@ -372,17 +358,17 @@ def page_performance():
     st.markdown("<h2 style='color:#9b59b6;'>🏆 Top-5 Accuracy</h2>", unsafe_allow_html=True)
     st.bar_chart(df_results.set_index("Model")[["top5", "val_top5"]])
 
-    # ✅ Inference speed comparison (example values)
+    # ✅ Inference speed comparison (hard-coded example, replace with measured times)
     st.markdown("<h2 style='color:#d35400;'>⚡ Inference Speed (seconds per image)</h2>", unsafe_allow_html=True)
     st.bar_chart({"VGG16": 0.12, "ResNet50": 0.18, "MobileNetV2": 0.08, "EfficientNetB0": 0.10})
 
     # 📑 Class-wise performance breakdown
     st.markdown("<h2 style='color:#16a085;'>📑 Class-wise Performance</h2>", unsafe_allow_html=True)
-    metrics_path = os.path.join(base_path, "class_metrics.csv")
-    if os.path.exists(metrics_path):
-        df_classes = pd.read_csv(metrics_path)
+    if os.path.exists("class_metrics.csv"):
+        df_classes = pd.read_csv("class_metrics.csv")
         st.dataframe(df_classes.style.highlight_max(axis=0, color="lightgreen"))
 
+        # Per-class comparison chart
         selected_class = st.selectbox("Select a class to compare across models:", df_classes["Class"])
         row = df_classes[df_classes["Class"] == selected_class].iloc[0]
 
@@ -399,28 +385,27 @@ def page_performance():
     # 🌀 Confusion matrices
     st.markdown("<h2 style='color:#c0392b;'>🌀 Confusion Matrices</h2>", unsafe_allow_html=True)
     cm_files = {
-        "VGG16": os.path.join(base_path, "confusion matrix VGG16.png"),
-        "ResNet50": os.path.join(base_path, "confusion matrix ResNet50.png"),
-        "MobileNetV2": os.path.join(base_path, "confusion matrix MobileNetV2.png"),
-        "EfficientNetB0": os.path.join(base_path, "confusion matrix EfficientNetB0.png")
+        "VGG16": "confusion matrix VGG16.png",
+        "ResNet50": "confusion matrix ResNet50.png",
+        "MobileNetV2": "confusion matrix MobileNetV2.png",
+        "EfficientNetB0": "confusion matrix EfficientNetB0.png"
     }
 
-    for model_name, file_path in cm_files.items():
-        if os.path.exists(file_path):
-            st.image(file_path, caption=f"📈 Confusion Matrix — {model_name}", use_container_width=True)
+    for model_name, file_name in cm_files.items():
+        if os.path.exists(file_name):
+            st.image(file_name, caption=f"📈 Confusion Matrix — {model_name}", use_container_width=True)
         else:
-            st.warning(f"⚠️ Confusion matrix image not found for {model_name}: {file_path}")
+            st.warning(f"⚠️ Confusion matrix image not found for {model_name}: {file_name}")
+
 
 # -----------------------------
 # Page 5: Live Webcam Detection (YOLOv8)
 # -----------------------------
-
 import cv2
 import time
 import streamlit as st
 from ultralytics import YOLO
 from PIL import Image
-import socket
 
 # Cache YOLO model
 @st.cache_resource
@@ -428,52 +413,54 @@ def load_yolo_model():
     return YOLO("yolov8s.pt")  # replace with your trained weights if needed
 
 def page_webcam():
-    st.markdown("<h1 style='color:#d35400;'>📹 Live Webcam Detection (YOLOv8)</h1>", unsafe_allow_html=True)
-    st.markdown("<h3 style='color:#2980b9;'>Real-time detection with FPS and latency metrics</h3>", unsafe_allow_html=True)
+    st.markdown(
+        "<h1 style='color:#d35400;'>📹 Live Webcam Detection (YOLOv8)</h1>",
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        "<h3 style='color:#2980b9;'>Real-time detection with FPS and latency metrics</h3>",
+        unsafe_allow_html=True
+    )
 
     conf_thresh = st.slider("Confidence Threshold", 0.0, 1.0, 0.5, 0.05, key="webcam_conf_slider")
 
-    # Detect if running locally or in cloud
-    hostname = socket.gethostname()
-    if "streamlit" in hostname.lower() or "cloud" in hostname.lower():
-        st.warning("⚠️ Webcam detection is not supported in the deployed cloud app.")
-        st.markdown(
-            "👉 Please run this app locally on your machine to use webcam detection. "
-            "[Click here to return to Live Webcam Detection locally](http://localhost:8501/?page=Live%20Webcam%20Detection)"
-        )
-        return
 
-    # Start webcam button (local only)
+    # Start webcam button
     if st.button("Start Webcam Detection", key="webcam_start_button"):
+
         yolo_model = load_yolo_model()
         cap = cv2.VideoCapture(0)  # 0 = default webcam
 
-        stframe = st.empty()
+        stframe = st.empty()  # placeholder for video frames
         fps_display = st.empty()
         latency_display = st.empty()
 
         while True:
             ret, frame = cap.read()
             if not ret:
-                st.warning("⚠️ Webcam detection is not supported in the deployed cloud app.")
-                st.markdown(
-            "👉 Please run this app locally on your machine to use webcam detection. "
-            "[Click here to return to Live Webcam Detection locally](http://localhost:8501/?page=Live%20Webcam%20Detection)"
-        )
+                st.error("⚠️ Unable to access webcam.")
                 break
 
             start = time.time()
+            # Run YOLO inference
             results = yolo_model.predict(source=frame, conf=conf_thresh, verbose=False)
-            annotated_frame = results[0].plot()
+
+            # Annotate frame with detections
+            annotated_frame = results[0].plot()  # YOLO provides .plot() for bounding boxes
+
+            # Convert BGR (OpenCV) → RGB (Streamlit/PIL)
             annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
 
+            # Show frame in Streamlit
             stframe.image(annotated_frame, caption="Live Detection", width=640)
 
+            # FPS & latency
             elapsed = time.time() - start
             fps = 1 / elapsed if elapsed > 0 else 0
             fps_display.metric("FPS", f"{fps:.2f}")
             latency_display.metric("Latency (ms)", f"{elapsed*1000:.1f}")
 
+            # Stop condition (Streamlit reruns script each interaction)
             if not cap.isOpened():
                 break
 
