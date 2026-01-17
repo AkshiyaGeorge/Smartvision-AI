@@ -124,15 +124,9 @@ def page_home():
 
     # Replace last two unclear demos with new ones
     demo_images = [
-        ("smartvision_dataset/detection/images/image_000000.jpg",
-         "smartvision_dataset/detection/labels/image_000000.txt",
-         "📷 Demo 1: Street Scene"),
-        ("smartvision_dataset/detection/images/image_000010.jpg",
-         "smartvision_dataset/detection/labels/image_000010.txt",
-         "📷 Demo 2: Restaurant Scene"),
-        ("smartvision_dataset/detection/images/image_000020.jpg",
-         "smartvision_dataset/detection/labels/image_000020.txt",
-         "📷 Demo 3: Outdoor Bench Scene")
+        ("image_000000.jpg", "image_000000.txt", "📷 Demo 1: Scene"),
+        ("image_000010.jpg", "image_000010.txt", "📷 Demo 2: Scene"),
+        ("image_000020.jpg", "image_000020.txt", "📷 Demo 3: Scene"),
     ]
 
     for img_path, label_path, caption in demo_images:
