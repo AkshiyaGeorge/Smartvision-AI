@@ -154,22 +154,23 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from PIL import Image
-
 import tensorflow as tf
-from tensorflow.keras.models import load_model
+import gdown
+
 from tensorflow.keras.applications.vgg16 import preprocess_input as vgg_pre
 from tensorflow.keras.applications.resnet50 import preprocess_input as res_pre
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input as mob_pre
 from tensorflow.keras.applications.efficientnet import preprocess_input as eff_pre
 
 # -----------------------------
-# Config: model paths and classes
+# Config: Google Drive IDs and class labels
 # -----------------------------
-MODELS = {
-    "VGG16": (r"C:\Akshi Personal\SMARTVISION AI\best_vgg16.keras", vgg_pre),
-    "ResNet50": (r"C:\Akshi Personal\SMARTVISION AI\best_resnet50.keras", res_pre),
-    "MobileNetV2": (r"C:\Akshi Personal\SMARTVISION AI\best_mobilenetv2.keras", mob_pre),
-    "EfficientNetB0": (r"C:\Akshi Personal\SMARTVISION AI\best_efficientnetb0.keras", eff_pre),
+# Replace with your actual Drive file IDs
+DRIVE_IDS = {
+    "VGG16": "1Pn7IDM2pJdg8E5y4kQjzdJ-1criM4UvB",
+    "ResNet50": "1X-i_G_9Kyl7rNGbmEDQ5yYHF_SyzRwVW",
+    "MobileNetV2": "1_TxFmwxdeiaVXfAAYWWfnEKUUSd_gv_K",
+    "EfficientNetB0": "1vK88TFwcavnPi2n-vms5WE8DhLTDcwBc",
 }
 
 CLASS_NAMES = [
@@ -179,12 +180,25 @@ CLASS_NAMES = [
 ]
 
 # -----------------------------
+# Helper: download model from Google Drive if not present
+# -----------------------------
+base_path = "Smartvision-AI/models"
+os.makedirs(base_path, exist_ok=True)
+
+def ensure_model(file_id, filename):
+    path = os.path.join(base_path, filename)
+    if not os.path.exists(path):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, path, quiet=False)
+    return path
+
+# -----------------------------
 # Cached model loading
 # -----------------------------
 @st.cache_resource
 def get_model(path: str):
     if os.path.exists(path):
-        return load_model(path)
+        return tf.keras.models.load_model(path)
     else:
         st.error(f"❌ Model file not found: {path}")
         return None
@@ -220,10 +234,18 @@ def page_classification():
         top1_labels, top1_confs = [], []
 
         # Show predictions from all 4 models
-        for name, (path, pre_fn) in MODELS.items():
-            model = get_model(path)
+        for name, file_id in DRIVE_IDS.items():
+            # Ensure model is downloaded
+            model_path = ensure_model(file_id, f"best_{name.lower()}.keras")
+            model = get_model(model_path)
+
             if model:
-                preds = predict_top5(model, img, CLASS_NAMES, pre_fn)
+                preds = predict_top5(model, img, CLASS_NAMES, {
+                    "VGG16": vgg_pre,
+                    "ResNet50": res_pre,
+                    "MobileNetV2": mob_pre,
+                    "EfficientNetB0": eff_pre
+                }[name])
 
                 st.write(f"**{name}**")
                 df = pd.DataFrame(preds, columns=["Label", "Confidence"])
@@ -240,7 +262,7 @@ def page_classification():
         # Side-by-side model comparison
         st.subheader("Model Comparison — Top-1 Prediction")
         comparison = {
-            "Model": list(MODELS.keys()),
+            "Model": list(DRIVE_IDS.keys()),
             "Top-1 Label": top1_labels,
             "Top-1 Confidence": top1_confs
         }
